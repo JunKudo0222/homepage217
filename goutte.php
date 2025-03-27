@@ -210,8 +210,8 @@ $post_content = $crawler->filter('div[class="post_content"]')->html();
 $title = $crawler->filter('h1[class="c-postTitle__ttl"]')->html();
 
 // SQLクエリ（不要なカラムを省略）
-$sql = "INSERT INTO wpaec76aposts (post_content, post_title, post_status,  post_type ,post_date,post_name) 
-        VALUES (:content, :title, 'publish',  'post' ,:post_date,:post_name)";
+$sql = "INSERT INTO wp5fb39eposts (post_content, post_title, post_status,  post_type ,post_date,post_date_gmt,post_modified,post_modified_gmt,post_excerpt,to_ping,pinged,post_content_filtered,post_name) 
+        VALUES (:content, :title, 'publish',  'post' ,:post_date,:post_date_gmt,:post_modified,:post_modified_gmt,:post_excerpt,:to_ping,:pinged,:post_content_filtered,:post_name)";
 
 
 // プリペアドステートメントを準備
@@ -223,6 +223,13 @@ $stmt = $pdo->prepare($sql);
         ':title' => $title,
         ':content' => $post_content,
         ':post_date' => $url[2],
+        ':post_date_gmt' => $url[2],
+        ':post_modified' => $url[2],
+        ':post_modified_gmt' => $url[2],
+        ':post_excerpt' => "",
+        ':to_ping' => "",
+        ':pinged' => "",
+        ':post_content_filtered' => "",
         ':post_name' => $url[1],
     ]);
 
