@@ -32,8 +32,10 @@ class CookieJar
      * this method returns the first cookie for the given name/path
      * (this behavior ensures a BC behavior with previous versions of
      * Symfony).
+     *
+     * @return Cookie|null
      */
-    public function get(string $name, string $path = '/', string $domain = null): ?Cookie
+    public function get(string $name, string $path = '/', ?string $domain = null)
     {
         $this->flushExpiredCookies();
 
@@ -65,7 +67,7 @@ class CookieJar
      * all cookies for the given name/path expire (this behavior
      * ensures a BC behavior with previous versions of Symfony).
      */
-    public function expire(string $name, ?string $path = '/', string $domain = null)
+    public function expire(string $name, ?string $path = '/', ?string $domain = null)
     {
         if (null === $path) {
             $path = '/';
@@ -105,7 +107,7 @@ class CookieJar
      *
      * @param string[] $setCookies Set-Cookie headers from an HTTP response
      */
-    public function updateFromSetCookie(array $setCookies, string $uri = null)
+    public function updateFromSetCookie(array $setCookies, ?string $uri = null)
     {
         $cookies = [];
 
@@ -131,7 +133,7 @@ class CookieJar
     /**
      * Updates the cookie jar from a Response object.
      */
-    public function updateFromResponse(Response $response, string $uri = null)
+    public function updateFromResponse(Response $response, ?string $uri = null)
     {
         $this->updateFromSetCookie($response->getHeader('Set-Cookie', false), $uri);
     }
@@ -141,7 +143,7 @@ class CookieJar
      *
      * @return Cookie[]
      */
-    public function all(): array
+    public function all()
     {
         $this->flushExpiredCookies();
 
@@ -159,8 +161,10 @@ class CookieJar
 
     /**
      * Returns not yet expired cookie values for the given URI.
+     *
+     * @return array
      */
-    public function allValues(string $uri, bool $returnsRawValue = false): array
+    public function allValues(string $uri, bool $returnsRawValue = false)
     {
         $this->flushExpiredCookies();
 
@@ -194,8 +198,10 @@ class CookieJar
 
     /**
      * Returns not yet expired raw cookie values for the given URI.
+     *
+     * @return array
      */
-    public function allRawValues(string $uri): array
+    public function allRawValues(string $uri)
     {
         return $this->allValues($uri, true);
     }

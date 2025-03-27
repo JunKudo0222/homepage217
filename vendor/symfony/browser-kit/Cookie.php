@@ -40,7 +40,7 @@ class Cookie
     protected $secure;
     protected $httponly;
     protected $rawValue;
-    private ?string $samesite;
+    private $samesite;
 
     /**
      * Sets a cookie.
@@ -55,7 +55,7 @@ class Cookie
      * @param bool        $encodedValue Whether the value is encoded or not
      * @param string|null $samesite     The cookie samesite attribute
      */
-    public function __construct(string $name, ?string $value, string $expires = null, string $path = null, string $domain = '', bool $secure = false, bool $httponly = true, bool $encodedValue = false, string $samesite = null)
+    public function __construct(string $name, ?string $value, ?string $expires = null, ?string $path = null, string $domain = '', bool $secure = false, bool $httponly = true, bool $encodedValue = false, ?string $samesite = null)
     {
         if ($encodedValue) {
             $this->value = urldecode($value);
@@ -83,8 +83,10 @@ class Cookie
 
     /**
      * Returns the HTTP representation of the Cookie.
+     *
+     * @return string
      */
-    public function __toString(): string
+    public function __toString()
     {
         $cookie = sprintf('%s=%s', $this->name, $this->rawValue);
 
@@ -119,9 +121,11 @@ class Cookie
     /**
      * Creates a Cookie instance from a Set-Cookie header value.
      *
+     * @return static
+     *
      * @throws \InvalidArgumentException
      */
-    public static function fromString(string $cookie, string $url = null): static
+    public static function fromString(string $cookie, ?string $url = null)
     {
         $parts = explode(';', $cookie);
 
@@ -144,7 +148,7 @@ class Cookie
         ];
 
         if (null !== $url) {
-            if ((false === $urlParts = parse_url($url)) || !isset($urlParts['host'])) {
+            if (false === ($urlParts = parse_url($url)) || !isset($urlParts['host'])) {
                 throw new \InvalidArgumentException(sprintf('The URL "%s" is not valid.', $url));
             }
 
@@ -157,7 +161,7 @@ class Cookie
 
             if ('secure' === strtolower($part)) {
                 // Ignore the secure flag if the original URI is not given or is not HTTPS
-                if (!$url || !isset($urlParts['scheme']) || 'https' != $urlParts['scheme']) {
+                if (null === $url || !isset($urlParts['scheme']) || 'https' != $urlParts['scheme']) {
                     continue;
                 }
 
@@ -217,72 +221,90 @@ class Cookie
 
     /**
      * Gets the name of the cookie.
+     *
+     * @return string
      */
-    public function getName(): string
+    public function getName()
     {
         return $this->name;
     }
 
     /**
      * Gets the value of the cookie.
+     *
+     * @return string
      */
-    public function getValue(): string
+    public function getValue()
     {
         return $this->value;
     }
 
     /**
      * Gets the raw value of the cookie.
+     *
+     * @return string
      */
-    public function getRawValue(): string
+    public function getRawValue()
     {
         return $this->rawValue;
     }
 
     /**
      * Gets the expires time of the cookie.
+     *
+     * @return string|null
      */
-    public function getExpiresTime(): ?string
+    public function getExpiresTime()
     {
         return $this->expires;
     }
 
     /**
      * Gets the path of the cookie.
+     *
+     * @return string
      */
-    public function getPath(): string
+    public function getPath()
     {
         return $this->path;
     }
 
     /**
      * Gets the domain of the cookie.
+     *
+     * @return string
      */
-    public function getDomain(): string
+    public function getDomain()
     {
         return $this->domain;
     }
 
     /**
      * Returns the secure flag of the cookie.
+     *
+     * @return bool
      */
-    public function isSecure(): bool
+    public function isSecure()
     {
         return $this->secure;
     }
 
     /**
      * Returns the httponly flag of the cookie.
+     *
+     * @return bool
      */
-    public function isHttpOnly(): bool
+    public function isHttpOnly()
     {
         return $this->httponly;
     }
 
     /**
      * Returns true if the cookie has expired.
+     *
+     * @return bool
      */
-    public function isExpired(): bool
+    public function isExpired()
     {
         return null !== $this->expires && 0 != $this->expires && $this->expires <= time();
     }

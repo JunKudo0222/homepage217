@@ -21,9 +21,20 @@ use Symfony\Component\DomCrawler\Field\FormField;
  */
 class Form extends Link implements \ArrayAccess
 {
-    private \DOMElement $button;
+    /**
+     * @var \DOMElement
+     */
+    private $button;
+
+    /**
+     * @var FormFieldRegistry
+     */
     private $fields;
-    private ?string $baseHref;
+
+    /**
+     * @var string
+     */
+    private $baseHref;
 
     /**
      * @param \DOMElement $node       A \DOMElement instance
@@ -33,7 +44,7 @@ class Form extends Link implements \ArrayAccess
      *
      * @throws \LogicException if the node is not a button inside a form tag
      */
-    public function __construct(\DOMElement $node, string $currentUri = null, string $method = null, string $baseHref = null)
+    public function __construct(\DOMElement $node, ?string $currentUri = null, ?string $method = null, ?string $baseHref = null)
     {
         parent::__construct($node, $currentUri, $method);
         $this->baseHref = $baseHref;
@@ -43,8 +54,10 @@ class Form extends Link implements \ArrayAccess
 
     /**
      * Gets the form node associated with this form.
+     *
+     * @return \DOMElement
      */
-    public function getFormNode(): \DOMElement
+    public function getFormNode()
     {
         return $this->node;
     }
@@ -56,7 +69,7 @@ class Form extends Link implements \ArrayAccess
      *
      * @return $this
      */
-    public function setValues(array $values): static
+    public function setValues(array $values)
     {
         foreach ($values as $name => $value) {
             $this->fields->set($name, $value);
@@ -69,8 +82,10 @@ class Form extends Link implements \ArrayAccess
      * Gets the field values.
      *
      * The returned array does not include file fields (@see getFiles).
+     *
+     * @return array
      */
-    public function getValues(): array
+    public function getValues()
     {
         $values = [];
         foreach ($this->fields->all() as $name => $field) {
@@ -88,8 +103,10 @@ class Form extends Link implements \ArrayAccess
 
     /**
      * Gets the file field values.
+     *
+     * @return array
      */
-    public function getFiles(): array
+    public function getFiles()
     {
         if (!\in_array($this->getMethod(), ['POST', 'PUT', 'DELETE', 'PATCH'])) {
             return [];
@@ -115,8 +132,10 @@ class Form extends Link implements \ArrayAccess
      *
      * This method converts fields with the array notation
      * (like foo[bar] to arrays) like PHP does.
+     *
+     * @return array
      */
-    public function getPhpValues(): array
+    public function getPhpValues()
     {
         $values = [];
         foreach ($this->getValues() as $name => $value) {
@@ -140,8 +159,10 @@ class Form extends Link implements \ArrayAccess
      * (@see getPhpValues), rather than uploaded files found in $_FILES.
      * For a compound file field foo[bar] it will create foo[bar][name],
      * instead of foo[name][bar] which would be found in $_FILES.
+     *
+     * @return array
      */
-    public function getPhpFiles(): array
+    public function getPhpFiles()
     {
         $values = [];
         foreach ($this->getFiles() as $name => $value) {
@@ -174,15 +195,16 @@ class Form extends Link implements \ArrayAccess
      * The returned URI is not the same as the form "action" attribute.
      * This method merges the value if the method is GET to mimics
      * browser behavior.
+     *
+     * @return string
      */
-    public function getUri(): string
+    public function getUri()
     {
         $uri = parent::getUri();
 
         if (!\in_array($this->getMethod(), ['POST', 'PUT', 'DELETE', 'PATCH'])) {
-            $query = parse_url($uri, \PHP_URL_QUERY);
             $currentParameters = [];
-            if ($query) {
+            if ($query = parse_url($uri, \PHP_URL_QUERY)) {
                 parse_str($query, $currentParameters);
             }
 
@@ -196,7 +218,7 @@ class Form extends Link implements \ArrayAccess
         return $uri;
     }
 
-    protected function getRawUri(): string
+    protected function getRawUri()
     {
         // If the form was created from a button rather than the form node, check for HTML5 action overrides
         if ($this->button !== $this->node && $this->button->getAttribute('formaction')) {
@@ -210,8 +232,10 @@ class Form extends Link implements \ArrayAccess
      * Gets the form method.
      *
      * If no method is defined in the form, GET is returned.
+     *
+     * @return string
      */
-    public function getMethod(): string
+    public function getMethod()
     {
         if (null !== $this->method) {
             return $this->method;
@@ -237,8 +261,10 @@ class Form extends Link implements \ArrayAccess
 
     /**
      * Returns true if the named field exists.
+     *
+     * @return bool
      */
-    public function has(string $name): bool
+    public function has(string $name)
     {
         return $this->fields->has($name);
     }
@@ -258,7 +284,7 @@ class Form extends Link implements \ArrayAccess
      *
      * @throws \InvalidArgumentException When field is not present in this form
      */
-    public function get(string $name): FormField|array
+    public function get(string $name)
     {
         return $this->fields->get($name);
     }
@@ -276,7 +302,7 @@ class Form extends Link implements \ArrayAccess
      *
      * @return FormField[]
      */
-    public function all(): array
+    public function all()
     {
         return $this->fields->all();
     }
@@ -285,8 +311,11 @@ class Form extends Link implements \ArrayAccess
      * Returns true if the named field exists.
      *
      * @param string $name The field name
+     *
+     * @return bool
      */
-    public function offsetExists(mixed $name): bool
+    #[\ReturnTypeWillChange]
+    public function offsetExists($name)
     {
         return $this->has($name);
     }
@@ -300,7 +329,8 @@ class Form extends Link implements \ArrayAccess
      *
      * @throws \InvalidArgumentException if the field does not exist
      */
-    public function offsetGet(mixed $name): FormField|array
+    #[\ReturnTypeWillChange]
+    public function offsetGet($name)
     {
         return $this->fields->get($name);
     }
@@ -311,9 +341,12 @@ class Form extends Link implements \ArrayAccess
      * @param string       $name  The field name
      * @param string|array $value The value of the field
      *
+     * @return void
+     *
      * @throws \InvalidArgumentException if the field does not exist
      */
-    public function offsetSet(mixed $name, mixed $value): void
+    #[\ReturnTypeWillChange]
+    public function offsetSet($name, $value)
     {
         $this->fields->set($name, $value);
     }
@@ -322,8 +355,11 @@ class Form extends Link implements \ArrayAccess
      * Removes a field from the form.
      *
      * @param string $name The field name
+     *
+     * @return void
      */
-    public function offsetUnset(mixed $name): void
+    #[\ReturnTypeWillChange]
+    public function offsetUnset($name)
     {
         $this->fields->remove($name);
     }
@@ -333,7 +369,7 @@ class Form extends Link implements \ArrayAccess
      *
      * @return $this
      */
-    public function disableValidation(): static
+    public function disableValidation()
     {
         foreach ($this->fields->all() as $field) {
             if ($field instanceof Field\ChoiceFormField) {

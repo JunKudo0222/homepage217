@@ -64,7 +64,7 @@ define('NONCE_SALT',       'i,[M1gI+]v;|.ynZa-J{X#KgNLWa>/QIT!VAU,d<60`]!$3M{IBe
  * それぞれにユニーク (一意) な接頭辞を与えることで一つのデータベースに複数の WordPress を
  * インストールすることができます。半角英数字と下線のみを使用してください。
  */
-$table_prefix  = 'wpaec76a';
+$table_prefix  = 'wp5fb39e';
 
 /**
  * ローカル言語 - このパッケージでは初期値として 'ja' (日本語 UTF-8) が設定されています。
